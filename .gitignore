@@ -12,3 +12,8 @@ docs/
 
 # Dotenv file
 .env
+.qodo
+
+## ignore repo keys
+paul
+paul.pub

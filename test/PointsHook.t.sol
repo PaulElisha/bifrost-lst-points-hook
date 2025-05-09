@@ -78,7 +78,7 @@ contract TestPointsHook is Test, Deployers {
         bytes memory hookData = abi.encode(address(this));
 
         uint160 sqrtPriceAtTickLower = TickMath.getSqrtPriceAtTick(-60);
-        uint160 sqrtPriceAtTickUpper = TickMath.getSqrtPriceAtTick(60);
+        /*uint160 sqrtPriceAtTickUpper*/ TickMath.getSqrtPriceAtTick(60);
 
         uint256 ethToAdd = 0.1 ether;
         uint128 liquidityDelta = LiquidityAmounts.getLiquidityForAmount0(
@@ -86,7 +86,7 @@ contract TestPointsHook is Test, Deployers {
             SQRT_PRICE_1_1,
             ethToAdd
         );
-        uint256 tokenToAdd = LiquidityAmounts.getAmount1ForLiquidity(
+        /*uint256 tokenToAdd*/ LiquidityAmounts.getAmount1ForLiquidity(
             sqrtPriceAtTickLower,
             SQRT_PRICE_1_1,
             liquidityDelta

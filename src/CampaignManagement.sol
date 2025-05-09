@@ -8,7 +8,7 @@ abstract contract CampaignManagement is ERC20 {
     event CampaignDeactivated(uint48 id, bool);
     event PointsEarned(uint48 id, address usr, uint);
 
-    address admin;
+    address manager;
     mapping(uint48 id => Campaign) internal campaigns;
     mapping(uint48 id => mapping(address user => uint))
         public usrCampaignPoints;
@@ -29,31 +29,31 @@ abstract contract CampaignManagement is ERC20 {
         uint256 totalPointsDistributed;
     }
 
-    modifier onlyAdmin(uint48 id) {
-        require(campaigns[id].creator == admin, "NA");
+    modifier onlymanager(uint48 id) {
+        require(campaigns[id].creator == manager, "NA");
         _;
     }
 
     constructor() ERC20("LstPointsToken", "LPT", 18) {}
 
-    function _setAdmin(address n) internal {
-        admin = n;
+    function _setmanager(address n) internal {
+        manager = n;
     }
 
-    function _getAdmin() public view returns (address) {
-        return admin;
+    function _getmanager() public view returns (address) {
+        return manager;
     }
 
     function createCampaign(
         Campaign memory c
-    ) public onlyAdmin(c.id) returns (Campaign memory) {
+    ) public onlymanager(c.id) returns (Campaign memory) {
         require(!campaigns[c.id].isActive, "c_a");
 
         uint48 id = uint48(uint256(keccak256(abi.encode(c))));
 
         Campaign storage cm = campaigns[id];
         cm.id = c.id;
-        cm.creator = admin;
+        cm.creator = manager;
         cm.startTime = c.startTime;
         cm.endTime = c.endTime;
         cm.isActive = c.isActive;
@@ -65,7 +65,7 @@ abstract contract CampaignManagement is ERC20 {
         return cm;
     }
 
-    function toggleActive(uint48 id, bool toggle) external onlyAdmin(id) {
+    function toggleActive(uint48 id, bool toggle) external onlymanager(id) {
         if (toggle) {
             require(!campaigns[id].isActive);
 
@@ -91,7 +91,7 @@ abstract contract CampaignManagement is ERC20 {
         address usr,
         uint256 baseAmount,
         bool isSwap
-    ) internal onlyAdmin(id) {
+    ) internal onlymanager(id) {
         if (usr == address(0)) return;
 
         Campaign storage campaign = campaigns[id];

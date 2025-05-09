@@ -17,7 +17,17 @@ contract PointsHook is BaseHook, CampaignManagement {
     using CurrencyLibrary for Currency;
     using BalanceDeltaLibrary for BalanceDelta;
 
-    constructor(IPoolManager _manager) BaseHook(_manager) {}
+    address admin;
+    mapping(address => mapping(address => bool)) public approvedLSTPool;
+
+    constructor(IPoolManager _manager) BaseHook(_manager) {
+        admin = msg.sender;
+    }
+
+    modifier onlyAdmin() {
+        require(msg.sender == admin);
+        _;
+    }
 
     function getHookPermissions()
         public
@@ -44,6 +54,13 @@ contract PointsHook is BaseHook, CampaignManagement {
             });
     }
 
+    function addApporvedLSTPool(
+        address token0,
+        address token1
+    ) public onlyAdmin {
+        approvedLSTPool[token0][token1] = true;
+    }
+
     function afterSwap(
         address,
         PoolKey calldata key,
@@ -57,6 +74,12 @@ contract PointsHook is BaseHook, CampaignManagement {
 
         (uint48 id, address user) = abi.decode(hookData, (uint48, address));
         bool isSwap = true;
+
+        bool isLSTPool = approvedLSTPool[Currency.unwrap(key.currency0)][
+            Currency.unwrap(key.currency1)
+        ];
+
+        if (!isLSTPool) return (this.afterSwap.selector, 0);
 
         uint256 ethSpendAmount = uint256(int256(-delta.amount0()));
         uint256 pointsForSwap = ethSpendAmount / 5;
@@ -80,6 +103,12 @@ contract PointsHook is BaseHook, CampaignManagement {
         (uint48 id, address user) = abi.decode(hookData, (uint48, address));
 
         bool isSwap = false;
+
+        bool isLSTPool = approvedLSTPool[Currency.unwrap(key.currency0)][
+            Currency.unwrap(key.currency1)
+        ];
+
+        if (!isLSTPool) return (this.afterAddLiquidity.selector, delta);
 
         uint256 pointsForAddingLiquidity = uint256(int256(-delta.amount0()));
 
